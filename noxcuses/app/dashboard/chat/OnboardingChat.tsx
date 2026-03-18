@@ -2,24 +2,28 @@
 
 import { useState } from 'react'
 import { useChat } from '@ai-sdk/react'
+import { DefaultChatTransport } from 'ai'
+import type { UIMessage } from 'ai'
 
 const WELCOME_TEXT =
   "Hey! I'm your NoXcuses coach. I'm going to ask you a few questions to build your personalized training plan. Let's start — how old are you? (Under 16 / 16–17 / 18 or older)"
 
+const INITIAL_MESSAGES: UIMessage[] = [
+  {
+    id: 'welcome',
+    role: 'assistant',
+    parts: [{ type: 'text', text: WELCOME_TEXT }],
+  },
+]
+
 export default function OnboardingChat() {
   const [input, setInput] = useState('')
 
-  // In ai v6, useChat uses sendMessage({ text }) — there is no handleSubmit/handleInputChange.
-  // The 'messages' option sets initial messages. UIMessage has 'parts', not 'content'.
+  // ai v6: use transport with DefaultChatTransport for the API URL.
+  // sendMessage({ text }) replaces handleSubmit. Messages have 'parts', not 'content'.
   const { messages, sendMessage, status } = useChat({
-    api: '/api/onboard',
-    messages: [
-      {
-        id: 'welcome',
-        role: 'assistant' as const,
-        parts: [{ type: 'text' as const, text: WELCOME_TEXT }],
-      },
-    ],
+    transport: new DefaultChatTransport({ api: '/api/onboard' }),
+    messages: INITIAL_MESSAGES,
   })
 
   const isLoading = status === 'streaming' || status === 'submitted'
