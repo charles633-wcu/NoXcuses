@@ -11,7 +11,7 @@ export async function signup(formData: FormData) {
     password: formData.get('password') as string,
   })
 
-  if (error) return { error: error.message }
+  if (error) redirect(`/signup?error=${encodeURIComponent(error.message)}`)
 
   redirect('/dashboard')
 }
