@@ -59,7 +59,14 @@ function cannedResponse(text: string): Response {
 }
 
 // Correct useChat pattern (ai v6)
-const { messages, sendMessage, status } = useChat({ api: '/api/onboard', messages: [...] })
+// IMPORTANT: useChat does NOT accept 'api' directly in v6 — use transport
+import { DefaultChatTransport } from 'ai'
+import type { UIMessage } from 'ai'
+const INITIAL_MESSAGES: UIMessage[] = [{ id: '...', role: 'assistant', parts: [...] }]
+const { messages, sendMessage, status } = useChat({
+  transport: new DefaultChatTransport({ api: '/api/onboard' }),
+  messages: INITIAL_MESSAGES,  // must be typed as UIMessage[], not inferred from literal
+})
 // sendMessage({ text: input }) — NOT handleSubmit
 // messages[n].parts — NOT messages[n].content
 ```
