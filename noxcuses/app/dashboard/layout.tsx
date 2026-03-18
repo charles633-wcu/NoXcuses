@@ -11,7 +11,7 @@ export default async function DashboardLayout({
   if (!user) redirect('/login')
 
   return (
-    <div className="min-h-screen flex">
+    <div className="h-screen flex overflow-hidden">
       <aside className="w-48 border-r p-4 flex flex-col gap-2">
         <span className="font-bold text-lg mb-4">NoXcuses</span>
         <a href="/dashboard/chat" className="hover:underline">Chat</a>
@@ -20,7 +20,7 @@ export default async function DashboardLayout({
         <a href="/dashboard/progress" className="hover:underline">Progress</a>
         <a href="/dashboard/nutrition" className="hover:underline">Nutrition</a>
       </aside>
-      <main className="flex-1 p-6">{children}</main>
+      <main className="flex-1 p-6 overflow-hidden flex flex-col">{children}</main>
     </div>
   )
 }
