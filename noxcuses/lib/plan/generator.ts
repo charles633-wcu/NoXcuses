@@ -10,7 +10,7 @@ type PlanProfile = {
   training_age?: string
   equipment?: string
   days_per_week?: number
-  limitations?: string
+  limitations?: string | null
 }
 
 export async function generatePlan(profile: PlanProfile, provider: AIProvider): Promise<WorkoutPlan> {

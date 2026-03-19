@@ -22,7 +22,7 @@ export interface ProfileDraft {
   training_age?: string
   equipment?: string
   days_per_week?: number
-  limitations?: string
+  limitations?: string | null
 }
 
 // Minimal type for UIMessage parts (avoids importing from ai in shared types)
