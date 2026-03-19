@@ -140,7 +140,7 @@ export async function POST(req: Request) {
         }
 
         await updateProfile(user.id, {
-          onboarding_state: 'COMPLETE',
+          onboarding_state: nextState(currentState),
           onboarding_complete: true,
         })
 
@@ -186,18 +186,14 @@ export async function POST(req: Request) {
                 (profileUpdate as Record<string, unknown>)[field] = parsed.value
               }
 
-              const isComplete = currentState === 'PLAN_GENERATION'
               await updateProfile(user.id, {
                 ...profileUpdate,
                 onboarding_state: nextState(currentState),
-                ...(isComplete ? { onboarding_complete: true } : {}),
               })
             } else {
               // States with no field extraction (WELCOME, PHOTO_OFFER, SUMMARY, etc.) still advance
-              const isComplete = currentState === 'PLAN_GENERATION'
               await updateProfile(user.id, {
                 onboarding_state: nextState(currentState),
-                ...(isComplete ? { onboarding_complete: true } : {}),
               })
             }
           } catch {
