@@ -14,6 +14,7 @@ import {
   systemPromptForState,
 } from '@/lib/onboarding/state-machine'
 import type { OnboardingState, ProfileDraft, UIMessagePart } from '@/lib/onboarding/types'
+import { generatePlan } from '@/lib/plan/generator'
 
 const UNDER_16_MESSAGE =
   "This app is designed for users 16 and older. We hope to see you back soon!"
@@ -103,6 +104,53 @@ export async function POST(req: Request) {
     if (extraction.trim().toLowerCase() === 'yes') {
       return cannedResponse(UNDER_16_MESSAGE)
     }
+  }
+
+  // PLAN_GENERATION: skip streamText entirely — generate plan, insert, stream canned messages
+  if (currentState === 'PLAN_GENERATION') {
+    const planStream = createUIMessageStream({
+      execute: async ({ writer }) => {
+        const id1 = crypto.randomUUID()
+        writer.write({ type: 'text-start', id: id1 })
+        writer.write({ type: 'text-delta', id: id1, delta: 'One moment, building your plan...' })
+        writer.write({ type: 'text-end', id: id1 })
+
+        let plan
+        try {
+          plan = await generatePlan(profile, provider)
+        } catch {
+          const id2 = crypto.randomUUID()
+          writer.write({ type: 'text-start', id: id2 })
+          writer.write({ type: 'text-delta', id: id2, delta: 'Something went wrong building your plan. Please try again.' })
+          writer.write({ type: 'text-end', id: id2 })
+          return
+        }
+
+        try {
+          const { error } = await supabase
+            .from('workouts')
+            .insert({ user_id: user.id, plan_data: plan, status: 'active' })
+          if (error) throw new Error(error.message)
+        } catch {
+          const id2 = crypto.randomUUID()
+          writer.write({ type: 'text-start', id: id2 })
+          writer.write({ type: 'text-delta', id: id2, delta: 'Something went wrong saving your plan. Please try again.' })
+          writer.write({ type: 'text-end', id: id2 })
+          return
+        }
+
+        await updateProfile(user.id, {
+          onboarding_state: 'COMPLETE',
+          onboarding_complete: true,
+        })
+
+        const id2 = crypto.randomUUID()
+        writer.write({ type: 'text-start', id: id2 })
+        writer.write({ type: 'text-delta', id: id2, delta: 'Your plan is ready!' })
+        writer.write({ type: 'text-end', id: id2 })
+      },
+    })
+    return createUIMessageStreamResponse({ stream: planStream })
   }
 
   // 6. Stream response
