@@ -28,6 +28,14 @@ export default function OnboardingChat() {
 
   const isLoading = status === 'streaming' || status === 'submitted'
 
+  const lastAssistant = [...messages].reverse().find((m) => m.role === 'assistant')
+  const lastText =
+    lastAssistant?.parts
+      .filter((p) => p.type === 'text')
+      .map((p) => (p as { type: 'text'; text: string }).text)
+      .join('') ?? ''
+  const planReady = lastText.includes('Your plan is ready!')
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!input.trim() || isLoading) return
@@ -66,6 +74,17 @@ export default function OnboardingChat() {
           </div>
         )}
       </div>
+
+      {planReady && (
+        <div className="py-3 flex justify-center">
+          <a
+            href="/dashboard/plan"
+            className="bg-black text-white rounded-xl px-6 py-2 text-sm hover:bg-gray-800"
+          >
+            View your plan →
+          </a>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="flex gap-2 pt-4 border-t">
         <input
