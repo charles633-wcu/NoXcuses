@@ -1,5 +1,24 @@
 import type { OnboardingState, ProfileDraft } from './types'
 
+const AGE_LABEL: Record<string, string> = {
+  under_16: 'Under 16', '16_17': '16–17', '18_plus': '18 or older',
+}
+const GOAL_LABEL: Record<string, string> = {
+  muscle_gain: 'Muscle gain', fat_loss: 'Fat loss',
+  recomposition: 'Body recomposition', general_fitness: 'General fitness',
+}
+const SEX_LABEL: Record<string, string> = {
+  male: 'Male', female: 'Female', other: 'Prefer not to say',
+}
+const TRAINING_LABEL: Record<string, string> = {
+  none: 'No prior training', under_6mo: 'Less than 6 months',
+  '6mo_2yr': '6 months to 2 years', over_2yr: 'More than 2 years',
+}
+const EQUIPMENT_LABEL: Record<string, string> = {
+  full_gym: 'Full gym', dumbbells: 'Dumbbells only',
+  home: 'Home gym', bodyweight: 'Bodyweight only',
+}
+
 export const ORDERED_STATES: OnboardingState[] = [
   'WELCOME',
   'AGE_BRACKET',
@@ -106,9 +125,18 @@ Make clear this is completely optional.`,
 
     SUMMARY: `${base}
 
-Present a clear summary of everything collected:
-age bracket, goal, sex, height and weight, training experience, equipment, schedule, and limitations.
-Ask them to confirm everything looks right before you generate their plan.`,
+Present the following profile summary to the user EXACTLY as shown below — plain text only, no markdown, no bold, no bullets:
+
+Age: ${AGE_LABEL[draft.age_bracket ?? ''] ?? 'Not provided'}
+Goal: ${GOAL_LABEL[draft.goal ?? ''] ?? 'Not provided'}
+Sex: ${SEX_LABEL[draft.sex ?? ''] ?? 'Not provided'}
+Height: ${draft.height_cm ? `${draft.height_cm}cm` : 'Not provided'} / Weight: ${draft.weight_kg ? `${draft.weight_kg}kg` : 'Not provided'}
+Experience: ${TRAINING_LABEL[draft.training_age ?? ''] ?? 'Not provided'}
+Equipment: ${EQUIPMENT_LABEL[draft.equipment ?? ''] ?? 'Not provided'}
+Schedule: ${draft.days_per_week ? `${draft.days_per_week} days/week` : 'Not provided'}
+Limitations: ${draft.limitations ?? 'None'}
+
+After presenting this summary, ask the user to confirm everything looks right before you generate their plan.`,
 
     PLAN_GENERATION: `${base}
 

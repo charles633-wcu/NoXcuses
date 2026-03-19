@@ -69,6 +69,38 @@ describe('systemPromptForState', () => {
   })
 })
 
+describe('systemPromptForState — SUMMARY', () => {
+  it('contains actual profile values from draft', () => {
+    const draft = {
+      age_bracket: '18_plus',
+      goal: 'muscle_gain',
+      sex: 'male',
+      height_cm: 175,
+      weight_kg: 80,
+      training_age: '6mo_2yr',
+      equipment: 'full_gym',
+      days_per_week: 4,
+    }
+    const prompt = systemPromptForState('SUMMARY', draft)
+    expect(prompt).toContain('Age:')
+    expect(prompt).toContain('18 or older')
+    expect(prompt).toContain('Muscle gain')
+    expect(prompt).toContain('175cm')
+    expect(prompt).toContain('80kg')
+    expect(prompt).toContain('4 days/week')
+  })
+
+  it('does not contain markdown bold syntax', () => {
+    const prompt = systemPromptForState('SUMMARY', { age_bracket: '18_plus' })
+    expect(prompt).not.toMatch(/\*\*/)
+  })
+
+  it('shows None for missing limitations', () => {
+    const prompt = systemPromptForState('SUMMARY', {})
+    expect(prompt).toContain('Limitations: None')
+  })
+})
+
 describe('extractAgeBracket', () => {
   it('returns under_16 for "under_16"', () => {
     expect(extractAgeBracket('under_16')).toBe('under_16')
