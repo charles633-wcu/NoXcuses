@@ -106,11 +106,13 @@ Uses `useChat` from `@ai-sdk/react` with `DefaultChatTransport({ api: '/api/chat
 Canned welcome message via `INITIAL_MESSAGES` (same pattern as `OnboardingChat`):
 
 ```typescript
+// UIMessage imported from 'ai' — same as OnboardingChat
+import type { UIMessage } from 'ai'
+
 const INITIAL_MESSAGES: UIMessage[] = [{
   id: 'welcome',
   role: 'assistant',
   parts: [{ type: 'text', text: "Hey! I'm your NoXcuses coach. How can I help you today?" }],
-  metadata: {}
 }]
 ```
 
@@ -123,16 +125,31 @@ Layout: full-height scroll area, message bubbles (user right, assistant left), l
 `app/api/chat/route.ts`:
 
 ```typescript
+import { createOpenAI } from '@ai-sdk/openai'
+import { streamText, convertToModelMessages } from 'ai'
+import { buildCoachingContext } from '@/lib/coaching/context'
+import type { WorkoutPlan } from '@/lib/plan/types'
+
+const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY })
+
 export async function POST(req: Request) {
   // 1. Auth check — return 401 if no user
   // 2. Parse messages from request body
-  // 3. Fetch profile from DB
-  // 4. Fetch most recent active workout (workouts table, status='active')
-  // 5. Parse plan_data from workout row (null if no workout)
+  // 3. Fetch profile from DB via getOrCreateProfile — pass the Profile directly to
+  //    buildCoachingContext (Profile satisfies CoachingProfile structurally; no transformation needed)
+  // 4. Fetch most recent active workout:
+  //    .from('workouts').select('plan_data')
+  //    .eq('user_id', user.id).eq('status', 'active')
+  //    .order('generated_at', { ascending: false }).limit(1).single()
+  //    If error or no row, plan = null
+  // 5. Assign plan_data: Supabase JS auto-parses JSONB — assign as WorkoutPlan directly,
+  //    do NOT JSON.parse. Cast: `row.plan_data as WorkoutPlan`
   // 6. Build context: buildCoachingContext(profile, plan)
   // 7. Stream response:
+  // Note: name the createOpenAI instance something other than `openai` (e.g. `openaiProvider`)
+  // to avoid shadowing the import identifier.
   const result = streamText({
-    model: openai('gpt-4o'),
+    model: openaiProvider('gpt-4o'),
     system: context,
     messages: await convertToModelMessages(messages),
   })
