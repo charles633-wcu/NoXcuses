@@ -1,10 +1,16 @@
 import { login } from './actions'
 
-export default function LoginPage() {
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ success?: string; error?: string }> }) {
+  const { success } = await searchParams
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8">
       <div className="w-full max-w-sm">
         <h1 className="text-2xl font-bold mb-6">Log in</h1>
+        {success && (
+          <p className="mb-4 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-4 py-2">
+            {success}
+          </p>
+        )}
         <form action={login} className="flex flex-col gap-4">
           <input
             name="email"

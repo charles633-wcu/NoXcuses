@@ -13,5 +13,5 @@ export async function signup(formData: FormData) {
 
   if (error) redirect(`/signup?error=${encodeURIComponent(error.message)}`)
 
-  redirect('/dashboard')
+  redirect('/login?success=Account+created%2C+please+log+in')
 }

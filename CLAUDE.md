@@ -21,7 +21,7 @@ NoXcuses/
 All development happens inside `noxcuses/`. Run all npm commands from there:
 ```bash
 cd noxcuses
-npm run dev        # Start dev server at localhost:3000
+npm run dev        # Start dev server at localhost:3001
 npm run test:run   # Run all tests once
 npm run build      # Production build (TypeScript check)
 ```
